@@ -61,20 +61,21 @@
     let isImage = false;
     let anousha = 1;
     let typedString = '';
+    let timeout; 
 
     document.addEventListener('keydown', (event) => {
-      if(event.key == "="){
-        anousha += 1;
-      } else if(event.key == "-"){
-        anousha -= 1;
-      }
       typedString += event.key; 
 
       if (typedString === 'anousha') {
-        isImage = !isImage; 
+        isImage = true; 
       } else if (typedString.length > 7) {
         typedString = typedString.slice(1);
       }
+     
+      clearTimeout(timeout);
+      timeout = setTimeout(() => {
+        typedString = '';
+      }, 1000); 
     });
 
     drawGrid();
