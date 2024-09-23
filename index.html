@@ -225,11 +225,11 @@
         const canvasY = canvas.height - gridMargin - (y * scaleY);
         
         // Use anousha to scale the width and height of the image
-        const imageWidth = 20 * anousha;
-        const imageHeight = 20 * anousha;
+        const imageWidth = 20;
+        const imageHeight = 20;
       
         if (isImage) {
-          ctx.drawImage(projectileImage, canvasX - imageWidth / 2, canvasY - imageHeight / 2, imageWidth, imageHeight);
+          ctx.drawImage(projectileImage, canvasX - imageWidth / 2, canvasY - imageHeight / 2, imageWidth * anousha, imageHeight * anousha);
         } else {
           ctx.fillStyle = 'red';
           ctx.beginPath();
