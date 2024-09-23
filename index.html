@@ -71,7 +71,7 @@
       typedString += event.key; 
 
       if (typedString === 'anousha') {
-        isImage = true; 
+        isImage = !isImage; 
       } else if (typedString.length > 7) {
         typedString = typedString.slice(1);
       }
