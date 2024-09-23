@@ -210,12 +210,8 @@
         // ctx.beginPath();
         // ctx.arc(canvasX, canvasY, 5, 0, 2 * Math.PI);
         // ctx.fill();
-        const imageSize = 10; // diameter of circle
-        ctx.beginPath();
-        ctx.arc(canvasX, canvasY, imageSize / 2, 0, 2 * Math.PI);
-        ctx.clip(); // crop image
+        const imageSize = 10; 
         ctx.drawImage(projectileImage, canvasX - imageSize / 2, canvasY - imageSize / 2, imageSize, imageSize);
-        ctx.restore();
 
 
         t += timeStep;
