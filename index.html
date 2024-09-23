@@ -52,15 +52,19 @@
     const ctx = canvas.getContext('2d');
     const g = 9.81; // Gravity (m/s^2)
 
-    const gridMargin = 50; // Margin for the grid from canvas edges
+    const gridMargin = 50; 
     const gridWidth = canvas.width - 2 * gridMargin;
     const gridHeight = canvas.height - 2 * gridMargin;
+    const projectileImage = new Image();
+    projectileImage.src = 'https://raw.githubusercontent.com/Dex9999/projectile-motion/refs/heads/main/anoush.png';
+
+    
 
     drawGrid();
 
     function drawGrid() {
-      const maxX = 100; // Fixed maximum for x-axis
-      const maxY = 50;  // Fixed maximum for y-axis
+      const maxX = 100; 
+      const maxY = 50;  
 
       ctx.strokeStyle = '#ddd';
       ctx.lineWidth = 1;
@@ -149,7 +153,7 @@
         return angle;
       }
 
-      // If not in the special format, return as a number
+      // If not in the [] format, just return number
       return parseFloat(angleInput);
     }
 
@@ -159,34 +163,31 @@
       const angleInput = document.getElementById('angle').value;
       const height = parseFloat(document.getElementById('height').value);
 
-      // Parse angle from input
       const angle = parseAngle(angleInput);
       
-      // Convert angle to radians
+      // Convert angle to radians for Math operations
       const angleRad = angle * (Math.PI / 180);
       const vx = velocity * Math.cos(angleRad); // Horizontal velocity component
       const vy = velocity * Math.sin(angleRad); // Vertical velocity component
 
-      // Time to reach maximum height and fall to the ground
       const timeToMaxHeight = vy / g;
       const maxHeight = height + (vy * timeToMaxHeight) - (0.5 * g * timeToMaxHeight * timeToMaxHeight);
       const timeToFall = Math.sqrt((2 * maxHeight) / g);
       const totalTime = timeToMaxHeight + timeToFall;
       const range = vx * totalTime;
 
-      // Display the calculated range
       document.getElementById('rangeResult').innerText = `dx: ${range.toFixed(2)}m  t: ${totalTime.toFixed(2)}s`;
 
-      const scaleX = gridWidth / 100; // Fixed scale for x-axis (distance)
-      const scaleY = gridHeight / 50;  // Fixed scale for y-axis (height)  
+      const scaleX = gridWidth / 100; 
+      const scaleY = gridHeight / 50; 
 
       let t = 0;
       const timeStep = 0.05;
       const trajectoryPoints = [];
 
       function draw() {
-        const x = vx * t; // Horizontal position
-        const y = height + vy * t - 0.5 * g * t * t; // Vertical position
+        const x = vx * t; 
+        const y = height + vy * t - 0.5 * g * t * t; 
 
         trajectoryPoints.push({ x, y });
 
@@ -205,10 +206,12 @@
 
         const canvasX = gridMargin + x * scaleX;
         const canvasY = canvas.height - gridMargin - (y * scaleY);
-        ctx.fillStyle = 'red';
-        ctx.beginPath();
-        ctx.arc(canvasX, canvasY, 5, 0, 2 * Math.PI);
-        ctx.fill();
+        // ctx.fillStyle = 'red';
+        // ctx.beginPath();
+        // ctx.arc(canvasX, canvasY, 5, 0, 2 * Math.PI);
+        // ctx.fill();
+        ctx.drawImage(projectileImage, canvasX - projectileImage.width / 2, canvasY - projectileImage.height / 2);
+
 
         t += timeStep;
 
