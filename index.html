@@ -227,6 +227,11 @@
 
         if (isImage) {
           ctx.drawImage(projectileImage, gridMargin + x * scaleX, canvas.height - (gridMargin + y * scaleY), 20, 20);
+        } else {
+          ctx.fillStyle = 'red';
+          ctx.beginPath();
+          ctx.arc(canvasX, canvasY, 5, 0, 2 * Math.PI);
+          ctx.fill();
         }
 
         t += timeStep;
