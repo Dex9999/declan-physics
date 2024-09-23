@@ -205,40 +205,45 @@
       function draw() {
         const x = vx * t; 
         const y = height + vy * t - 0.5 * g * t * t; 
-
+      
         trajectoryPoints.push({ x, y });
-
+      
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         drawGrid();
-
+      
         ctx.strokeStyle = 'blue';
         ctx.lineWidth = 2;
         ctx.beginPath();
-
+      
         for (const point of trajectoryPoints) {
           ctx.lineTo(gridMargin + point.x * scaleX, canvas.height - (gridMargin + point.y * scaleY));
         }
-
+      
         ctx.stroke();
-
+      
         const canvasX = gridMargin + x * scaleX;
         const canvasY = canvas.height - gridMargin - (y * scaleY);
         
+        // Use anousha to scale the width and height of the image
+        const imageWidth = 20 * anousha;
+        const imageHeight = 20 * anousha;
+      
         if (isImage) {
-          ctx.drawImage(projectileImage, gridMargin + x * scaleX * anousha, canvas.height - (gridMargin + y * scaleY * anousha), 20, 20);
+          ctx.drawImage(projectileImage, canvasX - imageWidth / 2, canvasY - imageHeight / 2, imageWidth, imageHeight);
         } else {
           ctx.fillStyle = 'red';
           ctx.beginPath();
           ctx.arc(canvasX, canvasY, 5, 0, 2 * Math.PI);
           ctx.fill();
         }
-
+      
         t += timeStep;
-
+      
         if (t <= totalTime) {
           requestAnimationFrame(draw);
         }
       }
+
 
       draw();
     }
