@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Projectile Motion Simulator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 0;
+      padding: 0;
+    }
+
+    canvas {
+      border: 1px solid black;
+      margin-top: 20px;
+    }
+
+    .controls {
+      margin-top: 20px;
+    }
+
+    .output {
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Projectile Motion Simulator</h1>
+
+  <div class="controls">
+    <label for="velocity">Initial Velocity (m/s): </label>
+    <input type="number" id="velocity" value="20">
+    <label for="angle">Launch Angle (degrees or [N60E]): </label>
+    <input type="text" id="angle" value="45">
+    <label for="height">Launch Height (m): </label>
+    <input type="number" id="height" value="0">
+    <button onclick="simulate()">Simulate</button>
+  </div>
+
+  <canvas id="canvas" width="850" height="350" style="border: 0px"></canvas>
+
+  <div class="output">
+    <h2 id="rangeResult"></h2>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const g = 9.81; // Gravity (m/s^2)
+
+    const gridMargin = 50; // Margin for the grid from canvas edges
+    const gridWidth = canvas.width - 2 * gridMargin;
+    const gridHeight = canvas.height - 2 * gridMargin;
+
+    drawGrid();
+
+    function drawGrid() {
+      const maxX = 100; // Fixed maximum for x-axis
+      const maxY = 50;  // Fixed maximum for y-axis
+
+      ctx.strokeStyle = '#ddd';
+      ctx.lineWidth = 1;
+
+      const numLinesX = 10;
+      for (let i = 0; i <= numLinesX; i++) {
+        let x = gridMargin + i * (gridWidth / numLinesX);
+        ctx.beginPath();
+        ctx.moveTo(x, gridMargin);
+        ctx.lineTo(x, canvas.height - gridMargin);
+        ctx.stroke();
+      }
+
+      const numLinesY = 10;
+      for (let i = 0; i <= numLinesY; i++) {
+        let y = gridMargin + i * (gridHeight / numLinesY);
+        ctx.beginPath();
+        ctx.moveTo(gridMargin, y);
+        ctx.lineTo(canvas.width - gridMargin, y);
+        ctx.stroke();
+      }
+
+      ctx.strokeStyle = '#aaa'; // Faint color for ticks
+      ctx.lineWidth = 1;
+      const tickInterval = 5; // Distance for tick marks
+      for (let i = 0; i <= maxX; i += tickInterval) {
+        const x = gridMargin + (i / maxX) * gridWidth;
+        ctx.beginPath();
+        ctx.moveTo(x, canvas.height - gridMargin + 5); // Position below the axis
+        ctx.lineTo(x, canvas.height - gridMargin - 5); // Position above the axis
+        ctx.stroke();
+      }
+
+      ctx.fillStyle = 'black';
+      ctx.font = '12px Arial';
+
+      for (let i = 0; i <= numLinesX; i++) {
+        let xLabel = ((i * maxX) / numLinesX).toFixed(0);
+        ctx.fillText(xLabel + ' m', gridMargin + i * (gridWidth / numLinesX), canvas.height - gridMargin + 15);
+      }
+
+      for (let i = 0; i <= numLinesY; i++) {
+        let yLabel = ((maxY - (i * maxY) / numLinesY)).toFixed(0);
+        ctx.fillText(yLabel + ' m', 20, gridMargin + i * (gridHeight / numLinesY) + 5);
+      }
+
+      ctx.fillText('Distance (m)', (canvas.width - gridMargin) / 2, canvas.height - 20);
+      ctx.save();
+      ctx.translate(30, (canvas.height + gridMargin) / 2);
+      ctx.rotate(-Math.PI / 2);
+      ctx.fillText('Height (m)', 0, -20);
+      ctx.restore();
+    }
+
+    function parseAngle(angleInput) {
+      const regex = /^\[(N|E|S|W)(\d+)(N|E|S|W)\]$/;
+      const match = angleInput.match(regex);
+
+      if (match) {
+        const direction1 = match[1];
+        const degree = parseInt(match[2]);
+        const direction2 = match[3];
+
+        // Calculate angle in degrees based on the directions
+        let angle = 0;
+
+        if (direction1 === 'N') {
+          angle = degree; // North
+        } else if (direction1 === 'S') {
+          angle = 180 - degree; // South
+        } else if (direction1 === 'E') {
+          angle = 90 - degree; // East
+        } else if (direction1 === 'W') {
+          angle = 270 + degree; // West
+        }
+
+        // Adjust angle based on the second direction
+        if (direction2 === 'E') {
+          angle = (angle + 90) % 360; // East
+        } else if (direction2 === 'S') {
+          angle = (angle + 180) % 360; // South
+        } else if (direction2 === 'W') {
+          angle = (angle + 270) % 360; // West
+        }
+
+        return angle;
+      }
+
+      // If not in the special format, return as a number
+      return parseFloat(angleInput);
+    }
+
+    function simulate() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const velocity = parseFloat(document.getElementById('velocity').value);
+      const angleInput = document.getElementById('angle').value;
+      const height = parseFloat(document.getElementById('height').value);
+
+      // Parse angle from input
+      const angle = parseAngle(angleInput);
+      
+      // Convert angle to radians
+      const angleRad = angle * (Math.PI / 180);
+      const vx = velocity * Math.cos(angleRad); // Horizontal velocity component
+      const vy = velocity * Math.sin(angleRad); // Vertical velocity component
+
+      // Time to reach maximum height and fall to the ground
+      const timeToMaxHeight = vy / g;
+      const maxHeight = height + (vy * timeToMaxHeight) - (0.5 * g * timeToMaxHeight * timeToMaxHeight);
+      const timeToFall = Math.sqrt((2 * maxHeight) / g);
+      const totalTime = timeToMaxHeight + timeToFall;
+      const range = vx * totalTime;
+
+      // Display the calculated range
+      document.getElementById('rangeResult').innerText = `dx: ${range.toFixed(2)}m  t: ${totalTime.toFixed(2)}s`;
+
+      const scaleX = gridWidth / 100; // Fixed scale for x-axis (distance)
+      const scaleY = gridHeight / 50;  // Fixed scale for y-axis (height)  
+
+      let t = 0;
+      const timeStep = 0.05;
+      const trajectoryPoints = [];
+
+      function draw() {
+        const x = vx * t; // Horizontal position
+        const y = height + vy * t - 0.5 * g * t * t; // Vertical position
+
+        trajectoryPoints.push({ x, y });
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawGrid();
+
+        ctx.strokeStyle = 'blue';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        for (const point of trajectoryPoints) {
+          const canvasX = gridMargin + point.x * scaleX;
+          const canvasY = canvas.height - gridMargin - (point.y * scaleY);
+          ctx.lineTo(canvasX, canvasY);
+        }
+        ctx.stroke();
+
+        const canvasX = gridMargin + x * scaleX;
+        const canvasY = canvas.height - gridMargin - (y * scaleY);
+        ctx.fillStyle = 'red';
+        ctx.beginPath();
+        ctx.arc(canvasX, canvasY, 5, 0, 2 * Math.PI);
+        ctx.fill();
+
+        t += timeStep;
+
+        if (y >= 0) {
+          requestAnimationFrame(draw);
+        }
+      }
+
+      draw();
+    }
+  </script>
+</body>
+</html>
