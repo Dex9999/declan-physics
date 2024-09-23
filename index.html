@@ -58,7 +58,17 @@
     const projectileImage = new Image();
     projectileImage.src = 'https://raw.githubusercontent.com/Dex9999/projectile-motion/refs/heads/main/anoush.png';
 
-    
+    let isImage = false;
+
+    let typedString = '';
+    document.addEventListener('keydown', (event) => {
+      typedString += event.key; 
+      if (typedString === 'anousha') {
+        isImage = true; 
+      } else if (typedString.length > 7) {
+        typedString = typedString.slice(1);
+      }
+    });
 
     drawGrid();
 
@@ -176,7 +186,7 @@
       const totalTime = timeToMaxHeight + timeToFall;
       const range = vx * totalTime;
 
-      document.getElementById('rangeResult').innerText = `dx: ${range.toFixed(2)}m  t: ${totalTime.toFixed(2)}s`;
+      document.getElementById('rangeResult').innerText = `dx: ${range.toFixed(2)}m\nv₁x: ${vx.toFixed(2)\nv₁y: ${vy.toFixed(2)\nΔt: ${totalTime.toFixed(2)}s`;
 
       const scaleX = gridWidth / 100; 
       const scaleY = gridHeight / 50; 
@@ -206,12 +216,16 @@
 
         const canvasX = gridMargin + x * scaleX;
         const canvasY = canvas.height - gridMargin - (y * scaleY);
-        // ctx.fillStyle = 'red';
-        // ctx.beginPath();
-        // ctx.arc(canvasX, canvasY, 5, 0, 2 * Math.PI);
-        // ctx.fill();
+        
         const imageSize = 50; 
-        ctx.drawImage(projectileImage, canvasX - imageSize / 2, canvasY - imageSize / 2, imageSize, imageSize);
+        if(isImage){
+          ctx.drawImage(projectileImage, canvasX - imageSize / 2, canvasY - imageSize / 2, imageSize, imageSize);
+        } else {
+          ctx.fillStyle = 'red';
+          ctx.beginPath();
+          ctx.arc(canvasX, canvasY, 5, 0, 2 * Math.PI);
+          ctx.fill();
+        }
 
 
         t += timeStep;
