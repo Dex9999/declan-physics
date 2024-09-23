@@ -59,26 +59,22 @@
     projectileImage.src = 'https://raw.githubusercontent.com/Dex9999/projectile-motion/refs/heads/main/anoush.png';
 
     let isImage = false;
-
+    let anousha = 1;
     let typedString = '';
-    let timeout; // Variable for timeout
 
     document.addEventListener('keydown', (event) => {
+      if(event.key == "="){
+        anousha += 1;
+      } else if(event.key == "-"){
+        anousha -= 1;
+      }
       typedString += event.key; 
 
-      // Check if the typed string matches "anousha"
       if (typedString === 'anousha') {
         isImage = true; 
       } else if (typedString.length > 7) {
         typedString = typedString.slice(1);
       }
-
-      // Clear previous timeout if typing continues
-      clearTimeout(timeout);
-      // Reset the typedString after 1 second of inactivity
-      timeout = setTimeout(() => {
-        typedString = '';
-      }, 1000); // Reset after 1 second
     });
 
     drawGrid();
@@ -108,14 +104,14 @@
         ctx.stroke();
       }
 
-      ctx.strokeStyle = '#aaa'; // Faint color for ticks
+      ctx.strokeStyle = '#aaa'; 
       ctx.lineWidth = 1;
-      const tickInterval = 5; // Distance for tick marks
+      const tickInterval = 5; 
       for (let i = 0; i <= maxX; i += tickInterval) {
         const x = gridMargin + (i / maxX) * gridWidth;
         ctx.beginPath();
-        ctx.moveTo(x, canvas.height - gridMargin + 5); // Position below the axis
-        ctx.lineTo(x, canvas.height - gridMargin - 5); // Position above the axis
+        ctx.moveTo(x, canvas.height - gridMargin + 5); 
+        ctx.lineTo(x, canvas.height - gridMargin - 5);
         ctx.stroke();
       }
 
@@ -186,10 +182,10 @@
 
       const angle = parseAngle(angleInput);
       
-      // Convert angle to radians for Math operations
+      // convert angle to radians for Math lib operations
       const angleRad = angle * (Math.PI / 180);
-      const vx = velocity * Math.cos(angleRad); // Horizontal velocity component
-      const vy = velocity * Math.sin(angleRad); // Vertical velocity component
+      const vx = velocity * Math.cos(angleRad); // horizontal velocity component
+      const vy = velocity * Math.sin(angleRad); // vertical velocity component
 
       const timeToMaxHeight = vy / g;
       const maxHeight = height + (vy * timeToMaxHeight) - (0.5 * g * timeToMaxHeight * timeToMaxHeight);
@@ -229,7 +225,7 @@
         const canvasY = canvas.height - gridMargin - (y * scaleY);
         
         if (isImage) {
-          ctx.drawImage(projectileImage, gridMargin + x * scaleX, canvas.height - (gridMargin + y * scaleY), 20, 20);
+          ctx.drawImage(projectileImage, gridMargin + x * scaleX * anousha, canvas.height - (gridMargin + y * scaleY * anousha), 20, 20);
         } else {
           ctx.fillStyle = 'red';
           ctx.beginPath();
