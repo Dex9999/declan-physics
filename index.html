@@ -61,13 +61,24 @@
     let isImage = false;
 
     let typedString = '';
+    let timeout; // Variable for timeout
+
     document.addEventListener('keydown', (event) => {
       typedString += event.key; 
+
+      // Check if the typed string matches "anousha"
       if (typedString === 'anousha') {
         isImage = true; 
       } else if (typedString.length > 7) {
         typedString = typedString.slice(1);
       }
+
+      // Clear previous timeout if typing continues
+      clearTimeout(timeout);
+      // Reset the typedString after 1 second of inactivity
+      timeout = setTimeout(() => {
+        typedString = '';
+      }, 1000); // Reset after 1 second
     });
 
     drawGrid();
@@ -207,30 +218,20 @@
         ctx.strokeStyle = 'blue';
         ctx.lineWidth = 2;
         ctx.beginPath();
+
         for (const point of trajectoryPoints) {
-          const canvasX = gridMargin + point.x * scaleX;
-          const canvasY = canvas.height - gridMargin - (point.y * scaleY);
-          ctx.lineTo(canvasX, canvasY);
+          ctx.lineTo(gridMargin + point.x * scaleX, canvas.height - (gridMargin + point.y * scaleY));
         }
+
         ctx.stroke();
 
-        const canvasX = gridMargin + x * scaleX;
-        const canvasY = canvas.height - gridMargin - (y * scaleY);
-        
-        const imageSize = 50; 
-        if(isImage){
-          ctx.drawImage(projectileImage, canvasX - imageSize / 2, canvasY - imageSize / 2, imageSize, imageSize);
-        } else {
-          ctx.fillStyle = 'red';
-          ctx.beginPath();
-          ctx.arc(canvasX, canvasY, 5, 0, 2 * Math.PI);
-          ctx.fill();
+        if (isImage) {
+          ctx.drawImage(projectileImage, gridMargin + x * scaleX, canvas.height - (gridMargin + y * scaleY), 20, 20);
         }
-
 
         t += timeStep;
 
-        if (y >= 0) {
+        if (t <= totalTime) {
           requestAnimationFrame(draw);
         }
       }
