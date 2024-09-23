@@ -225,6 +225,9 @@
 
         ctx.stroke();
 
+        const canvasX = gridMargin + x * scaleX;
+        const canvasY = canvas.height - gridMargin - (y * scaleY);
+        
         if (isImage) {
           ctx.drawImage(projectileImage, gridMargin + x * scaleX, canvas.height - (gridMargin + y * scaleY), 20, 20);
         } else {
