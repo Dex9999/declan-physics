@@ -1,53 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Projectile Motion Simulator</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      margin: 0;
-      padding: 0;
-    }
-
-    canvas {
-      border: 1px solid black;
-      margin-top: 20px;
-    }
-
-    .controls {
-      margin-top: 20px;
-    }
-
-    .output {
-      margin-top: 10px;
-    }
-  </style>
-</head>
-<body>
-  <h1>Projectile Motion Simulator</h1>
-
-  <div class="controls">
-    <label for="velocity">Initial Velocity (m/s): </label>
-    <input type="number" id="velocity" value="20">
-    <label for="angle">Launch Angle (degrees or [N60E]): </label>
-    <input type="text" id="angle" value="45">
-    <label for="height">Launch Height (m): </label>
-    <input type="number" id="height" value="0">
-    <button onclick="simulate()">Simulate</button>
-  </div>
-
-  <canvas id="canvas" width="850" height="350" style="border: 0px"></canvas>
-
-  <div class="output">
-    <h2 id="rangeResult"></h2>
-  </div>
-
-  <script>
+<script>
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
     const g = 9.81; // Gravity (m/s^2)
@@ -150,22 +101,22 @@
         let angle = 0;
 
         if (direction1 === 'N') {
-          angle = degree; // North
+          angle = 90 - degree; // North
         } else if (direction1 === 'S') {
-          angle = 180 - degree; // South
+          angle = 270 + degree; // South
         } else if (direction1 === 'E') {
-          angle = 90 - degree; // East
+          angle = 0 + degree; // East
         } else if (direction1 === 'W') {
-          angle = 270 + degree; // West
+          angle = 180 - degree; // West
         }
-
+    
         // Adjust angle based on the second direction
         if (direction2 === 'E') {
-          angle = (angle + 90) % 360; // East
+          angle = (angle + 90) % 360; // East adjustment
         } else if (direction2 === 'S') {
-          angle = (angle + 180) % 360; // South
+          angle = (angle + 180) % 360; // South adjustment
         } else if (direction2 === 'W') {
-          angle = (angle + 270) % 360; // West
+          angle = (angle + 270) % 360; // West adjustment
         }
 
         return angle;
@@ -200,7 +151,7 @@
       const scaleY = gridHeight / 50; 
 
       let t = 0;
-      const timeStep = 0.05;
+      const timeStep = totalTime / 200; // Calculate timeStep based on total time
       const trajectoryPoints = [];
 
       function draw() {
@@ -238,16 +189,13 @@
           ctx.fill();
         }
       
-        t += timeStep;
+        t += timeStep; // Increment time by the defined time step
       
         if (t <= totalTime) {
           requestAnimationFrame(draw);
         }
       }
 
-
       draw();
     }
   </script>
-</body>
-</html>
