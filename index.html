@@ -194,13 +194,13 @@
       const totalTime = timeToMaxHeight + timeToFall;
       const range = vx * totalTime;
 
-      document.getElementById('rangeResult').innerText = `dx: ${range.toFixed(2)} m\nv₁x: ${vx.toFixed(2)} m/s\nv₁y: ${vy.toFixed(2)} m/s\nΔt: ${totalTime.toFixed(2)} s`;
+      document.getElementById('rangeResult').innerText = `dx: ${range.toFixed(2)} m\nv₁x: ${vx.toFixed(2)} m/s\nv₁y: ${vy.toFixed(2)} m/s`;//\nΔt: ${totalTime.toFixed(2)} s`;
 
       const scaleX = gridWidth / 100; 
       const scaleY = gridHeight / 50; 
 
       let t = 0;
-      const timeStep = totalTime / 200; // based on total time
+      const timeStep = 0.05;//totalTime / 200; // based on total time
       const trajectoryPoints = [];
 
       function draw() {
