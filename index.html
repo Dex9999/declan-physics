@@ -1,4 +1,53 @@
-<script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Projectile Motion Simulator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 0;
+      padding: 0;
+    }
+
+    canvas {
+      border: 1px solid black;
+      margin-top: 20px;
+    }
+
+    .controls {
+      margin-top: 20px;
+    }
+
+    .output {
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Projectile Motion Simulator</h1>
+
+  <div class="controls">
+    <label for="velocity">Initial Velocity (m/s): </label>
+    <input type="number" id="velocity" value="20">
+    <label for="angle">Launch Angle (degrees or [N60E]): </label>
+    <input type="text" id="angle" value="45">
+    <label for="height">Launch Height (m): </label>
+    <input type="number" id="height" value="0">
+    <button onclick="simulate()">Simulate</button>
+  </div>
+
+  <canvas id="canvas" width="850" height="350" style="border: 0px"></canvas>
+
+  <div class="output">
+    <h2 id="rangeResult"></h2>
+  </div>
+
+  <script>
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
     const g = 9.81; // Gravity (m/s^2)
@@ -145,13 +194,13 @@
       const totalTime = timeToMaxHeight + timeToFall;
       const range = vx * totalTime;
 
-      document.getElementById('rangeResult').innerText = `dx: ${range.toFixed(2)} m\nv₁x: ${vx.toFixed(2)} m/s\nv₁y: ${vy.toFixed(2)} m/s\nΔt: ${totalTime.toFixed(2)} s`;
+      document.getElementById('rangeResult').innerText = dx: ${range.toFixed(2)} m\nv₁x: ${vx.toFixed(2)} m/s\nv₁y: ${vy.toFixed(2)} m/s\nΔt: ${totalTime.toFixed(2)} s;
 
       const scaleX = gridWidth / 100; 
       const scaleY = gridHeight / 50; 
 
       let t = 0;
-      const timeStep = totalTime / 200; // Calculate timeStep based on total time
+      const timeStep = totalTime / 200; // based on total time
       const trajectoryPoints = [];
 
       function draw() {
@@ -189,13 +238,16 @@
           ctx.fill();
         }
       
-        t += timeStep; // Increment time by the defined time step
+        t += timeStep;
       
         if (t <= totalTime) {
           requestAnimationFrame(draw);
         }
       }
 
+
       draw();
     }
   </script>
+</body>
+</html>
