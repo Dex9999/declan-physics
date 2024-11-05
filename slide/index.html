@@ -17,8 +17,7 @@
     }
 
     canvas {
-      border: 1px solid black;
-      margin-top: 20px;
+      border: 4px solid black;
     }
 
     .controls {
@@ -33,18 +32,39 @@
 <body>
   <h1>Slope Motion Simulator</h1>
 
-  <div class="controls">
-    <label for="angle">Slope Angle (degrees): </label>
-    <input type="number" id="angle" value="45">
-    <label for="coeff">Kinetic Friction Coeffecient: </label>
-    <input type="text" id="coeff" value="0.5">
-    <button onclick="simulate()">Simulate</button>
+  <div class="controls" style="display: inline-flex;gap: 1em;">
+    <!-- Row 1 -->
+    <div>
+      <label for="angle">Slope Angle (degrees):</label>
+      <input type="number" id="angle" value="45">
+    </div>
+    <div>
+      <label for="coeff">Kinetic Friction Coefficient:</label>
+      <input type="text" id="coeff" value="0.5">
+    </div>
+   <br>
+    <!-- Row 2 -->
+    <div>
+      <label for="length">Hypotenuse Length:</label>
+      <input type="text" id="length" value="10">
+    </div> 
+    <div>
+      <label for="mass">Mass:</label>
+      <input type="text" id="mass" value="1">
+    </div>
+    <br>
   </div>
+  <button onclick="simulate()" style="grid-column: 2 / span 2; margin-top: 10px;padding: 10px">Simulate</button>
+  
 
   <canvas id="canvas" width="850" height="350" style="border: 0px"></canvas>
 
-  <div class="output">
-    <h2 id="rangeResult"></h2>
+  <div class="output" style="display: flex; justify-content: space-between; align-items: center; gap: 20px; padding: 10px;">
+    <h2 id="rangeResult">Fn:<br>Ff:<br>Fgx:<br>a:<br>Δt:<br>θ:</h2>
+    <div style="text-align: center;">
+      <h2>Free Body Diagram</h2>
+      <canvas id="fbd" width="300" height="300" style="border: 1px solid black"></canvas>
+    </div>
   </div>
 
   <script>
@@ -52,19 +72,25 @@
     const ctx = canvas.getContext('2d');
     const g = 9.81; // Gravity (m/s^2)
 
-    const gridMargin = 50; 
+    const gridMargin = 50;
     const gridWidth = canvas.width - 2 * gridMargin;
     const gridHeight = canvas.height - 2 * gridMargin;
-    const projectileImage = new Image();
-    projectileImage.src = 'https://raw.githubusercontent.com/Dex9999/projectile-motion/refs/heads/main/anoush.png';
 
+    
+    const height = 150; // set triangle height for better viewing
+    const fbdCanvas = document.getElementById('fbd');
+    const fbdCtx = fbdCanvas.getContext('2d');
+    
+    const boxImage = new Image();
+    boxImage.src = 'https://raw.githubusercontent.com/Dex9999/projectile-motion/refs/heads/main/anoush.png';
     let isImage = false;
     let anousha = 1;
     let typedString = '';
     let timeout; 
 
+
     document.addEventListener('keydown', (event) => {
-      typedString += event.key; 
+      typedString += event.key;
 
       if (typedString === 'anousha') {
         isImage = !isImage; 
@@ -77,134 +103,179 @@
         typedString = '';
       }, 1000); 
     });
+    
 
     function drawTriangle(angle) {
-      const angleRad = angle * (Math.PI / 180); // Convert angle to radians
-      const height = 150; // Fixed height of the triangle
-      const baseLength = height / Math.tan(angleRad); // Calculate the base length to maintain the height
+      const angleRad = angle * (Math.PI / 180); // convert angle to radians for math operations
+      const baseLength = height / Math.tan(angleRad);
 
-      // Draw the right triangle
       ctx.beginPath();
       ctx.strokeStyle = 'black';
 
-      //left triangle
-      ctx.moveTo(gridMargin + 50, gridMargin + 300); // Bottom left corner (right angle)
-      ctx.lineTo(gridMargin + 50, gridMargin + 300 - height); // Top corner
-      ctx.lineTo(gridMargin + 50 + baseLength, gridMargin + 300); // Bottom right corner
+      ctx.moveTo(gridMargin + 50, gridMargin + 300); // bottom left corner (right angle)
+      ctx.lineTo(gridMargin + 50, gridMargin + 300 - height); // top
+      ctx.lineTo(gridMargin + 50 + baseLength, gridMargin + 300); // bottom right
 
-      ctx.closePath();
-      ctx.stroke(); // Draw the final line
-    }
-
-
-    function drawFBD(x, y, angle, fgy, ff, fgx) {
-      // Gravity force vector (down)
-      ctx.strokeStyle = 'blue';
-      ctx.beginPath();
-      ctx.moveTo(x, y);
-      ctx.lineTo(x, y + 50);
-      ctx.stroke();
-
-      // Normal force vector (perpendicular to slope)
-      ctx.strokeStyle = 'green';
-      ctx.beginPath();
-      ctx.moveTo(x, y);
-      ctx.lineTo(x - 50 * Math.sin(angle * Math.PI / 180), y - 50 * Math.cos(angle * Math.PI / 180));
-      ctx.stroke();
-
-      // Friction force vector (along slope)
-      ctx.strokeStyle = 'orange';
-      ctx.beginPath();
-      ctx.moveTo(x, y);
-      ctx.lineTo(x - 50 * Math.cos(angle * Math.PI / 180), y + 50 * Math.sin(angle * Math.PI / 180));
+      ctx.closePath(); // close the base
       ctx.stroke();
     }
-
-
+    
     function drawSquare(position, angle) {
-      
       const angleRad = angle * (Math.PI / 180);
-      const squareSize = 20; // Size of the square
-
-      const baseLength = 200; // Base length of the triangle
-      const height = baseLength * Math.tan(angleRad); // Height from base to top
-
-      // Calculate the position of the square along the slope (hypotenuse)
-      const x = gridMargin + 50 + position * Math.cos(angleRad);
-      const y = gridMargin + height + (position * Math.sin(angleRad)) - squareSize / 2;
-      // Save the current state of the canvas
-      ctx.save();
+      const squareSize = 20;
       
-      // Translate to the square's center and rotate it along the slope
+      const baseLength = height / Math.tan(angleRad); // use triangle's base length
+      
+      // use trig to calculate the square's position along the triangle's hypotenuse
+      const x = gridMargin + 50 + (position * Math.cos(angleRad));
+      const y = gridMargin + 300 - height + (position * Math.sin(angleRad)) - squareSize / 2;
+      
+      ctx.save();
       ctx.translate(x, y);
       ctx.rotate(angleRad);
 
-      // Draw the square, centered at the current position
-      ctx.fillStyle = 'red'; // Square color
-      ctx.fillRect(-squareSize / 2, -squareSize / 2, squareSize, squareSize);
-
-      // Restore the canvas to its original state
+      if (isImage) {
+        ctx.drawImage(boxImage, -squareSize / 2, -squareSize / 2, squareSize, squareSize);
+      } else {
+        ctx.fillStyle = 'red';
+        ctx.fillRect(-squareSize / 2, -squareSize / 2, squareSize, squareSize);
+      }
+      
       ctx.restore();
     }
+    
+    function drawFBD(Ff, Fgx, Fgy) {
+      const centerX = fbdCanvas.width / 2;
+      const centerY = fbdCanvas.height / 2;
 
+      // scale factor for arrows
+      const scale = 10; 
 
+      // square
+      fbdCtx.clearRect(0, 0, fbdCanvas.width, fbdCanvas.height); 
+      if (isImage) {
+          fbdCtx.drawImage(boxImage, centerX - 10, centerY - 10, 20, 20);
+      } else {
+          fbdCtx.fillStyle = 'red';
+          fbdCtx.fillRect(centerX - 10, centerY - 10, 20, 20);
+      }
 
-    function simulate() {
+      // Fgy - straight down (gravity perpendicular to the slope)
+      fbdCtx.beginPath();
+      fbdCtx.moveTo(centerX, centerY);
+      fbdCtx.lineTo(centerX, centerY + Fgy * scale);
+      fbdCtx.strokeStyle = 'green';
+      fbdCtx.lineWidth = 2;
+      fbdCtx.stroke();
+      
+      // Fn (normal force) opposite to Fgy, equal in magnitude
+      fbdCtx.beginPath();
+      fbdCtx.moveTo(centerX, centerY);
+      fbdCtx.lineTo(centerX, centerY - Fgy * scale);
+      fbdCtx.strokeStyle = 'blue';
+      fbdCtx.lineWidth = 2;
+      fbdCtx.stroke();
+      
+      // Fgx (gravity parallel to the slope)
+      fbdCtx.beginPath();
+      fbdCtx.moveTo(centerX, centerY);
+      fbdCtx.lineTo(centerX + Fgx * scale, centerY);
+      fbdCtx.strokeStyle = 'purple';
+      fbdCtx.lineWidth = 2;
+      fbdCtx.stroke();
+      
+      // Ff (frictional force) - opposite direction of Fgx
+      fbdCtx.beginPath();
+      fbdCtx.moveTo(centerX, centerY);
+      fbdCtx.lineTo(centerX - Ff * scale, centerY);
+      fbdCtx.strokeStyle = 'orange';
+      fbdCtx.lineWidth = 2;
+      fbdCtx.stroke();
+
+      // force labels
+      fbdCtx.fillStyle = 'black';
+      fbdCtx.fillText('Fgy', centerX-7, centerY + Fgy * scale + 15);
+      fbdCtx.fillText('Fn', centerX-6, centerY - Fgy * scale - 15);
+      fbdCtx.fillText('Fgx', centerX + Fgx * scale + 15, centerY+5);
+      fbdCtx.fillText('Ff', centerX - Ff * scale - 15, centerY+5);
+    }
+
+    async function simulate() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       const angle = parseFloat(document.getElementById('angle').value);
-      const friction = document.getElementById('coeff').value;
-      
-      // convert angle to radians for Math lib operations
+      const friction = parseFloat(document.getElementById('coeff').value);
       const angleRad = angle * (Math.PI / 180);
-      
-      const m = 1; // mass of the object
-      const l = 200; // length of the slope
-      
-      const fgx = m * g * Math.sin(angleRad); // horizontal velocity component
-      const fgy = m * g * Math.cos(angleRad); // vertical velocity component
-      const ff = friction * fgy; // frictional force
-      const a = (fgx - ff) / m; // acceleration of the object on x-axis
-      console.log(fgx, fgy, ff, a);
-      const time = Math.sqrt(Math.abs((2 * l) / a)); // time taken to reach the bottom of the slope
 
-      document.getElementById('rangeResult').innerText = `Fn: ${fgy.toFixed(2)}N\nFf: ${ff.toFixed(2)}\nFgx: ${fgx.toFixed(2)}N\nΔt: ${time.toFixed(2)}s\nθ: ${angle}°`;
+      let m = parseFloat(document.getElementById('mass').value);
+      if (isNaN(m) || m <= 0) {
+          m = 1; // Default mass
+      }
 
-      let position = 0; // Position on the slope
-      const totalFrames = 60; // Number of frames for animation
-      const totalDistance = Math.sqrt(l * l + (l * Math.tan(angleRad)) * (l * Math.tan(angleRad))); // Hypotenuse length
+      let l = parseFloat(document.getElementById('length').value) || 10; // length of slope
 
-      const interval = time / totalFrames; // Time per frame
-      let frame = 0; // Current frame
+      let fgx = m * g * Math.sin(angleRad);
+      let fgy = m * g * Math.cos(angleRad);
+      let ff = friction * fgy;
+      let a = (fgx - ff) / m;
+      console.log(fgx-ff);
+      console.log(m);
+      console.log((fgx-ff)/m);
+      console.log(a);
+      if (a < 0) {
+          a = 0;
+      }
+
+      let time = Math.sqrt(Math.abs((2 * l) / a));
+
+      // Log to check values
+      console.log('Mass:', m, 'Fgx:', fgx, 'Fgy:', fgy, 'Ff:', ff, 'Acceleration:', a);
+
+      drawFBD(ff, fgx, fgy);
+      document.getElementById('rangeResult').innerText = `Fn: ${fgy.toFixed(2)}N\nFf: ${ff.toFixed(2)}N\nFgx: ${fgx.toFixed(2)}N\na: ${a.toFixed(2)}m/s²\nΔt: ${time.toFixed(2)}s\nθ: ${angle}°`;
+
       
+      const height = 150;
+      const baseLength = height / Math.tan(angleRad);
+      
+      // scale length/acceleration for canvas effectively
+      const visualHypotenuseLength = Math.sqrt(Math.pow(height, 2) + Math.pow(baseLength, 2));
+      const scalingFactor = visualHypotenuseLength / l;
+      const visualAcceleration = a * scalingFactor;
+
       function animate() {
-        const startTime = performance.now(); // Track when the animation starts
+        const startTime = performance.now();
 
         function step() {
-          const currentTime = performance.now(); // Get current time
-          const elapsed = (currentTime - startTime) / 1000; // Calculate elapsed time in seconds
+          const currentTime = performance.now();
+          const elapsed = (currentTime - startTime) / 1000;
 
-          // Calculate the proportion of the total time that has elapsed
-          const progress = Math.min(elapsed / time, 1); // Clamp to a max of 1
-
-          // Update the position based on progress
-          position = totalDistance * progress;
+          // find position based on scaled acceleration
+          let position = 0.5 * visualAcceleration * Math.pow(elapsed, 2);
 
           ctx.clearRect(0, 0, canvas.width, canvas.height);
-          drawTriangle(angle); // Draw the triangle
-          drawSquare(position, angle); // Draw the square
+          drawTriangle(angle); 
+          drawSquare(position, angle);
 
-          if (progress < 1) {
-            animationFrameId = requestAnimationFrame(step); // Continue the animation
-          } else {
-            cancelAnimationFrame(animationFrameId); // Stop the animation when finished
+          if (elapsed < time) {
+            requestAnimationFrame(step);
           }
         }
 
-        step(); // Start the animation
+        step();
       }
-      animate();
-    }
+      
+      if(a === 0) {
+        drawSquare(0, angle);
+        drawTriangle(angle);
 
+        // wait for 0.5 seconds to show results with alert
+        setTimeout(() => {
+          alert('Fgx will not overcome frictional force');
+        }, 500);
+      } else {
+        animate();
+      }
+    }
   </script>
 </body>
 </html>
