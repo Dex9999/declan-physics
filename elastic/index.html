@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Elastic Collision Simulator</title>
+  <link rel="icon" href="/images/favicon.ico" type="image/x-icon">
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 0;
+      padding: 0;
+    }
+    canvas {
+      border: 2px solid black;
+      margin-top: 20px;
+    }
+    .controls {
+      margin: 20px;
+      display: flex;
+      gap: 15px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Elastic Collision Simulator</h1>
+
+  <div class="controls">
+    <div>
+      <label for="mass1">Mass 1 (kg):</label>
+      <input type="number" id="mass1" value="2">
+    </div>
+    <div>
+      <label for="vel1">Initial Velocity 1 (m/s):</label>
+      <input type="number" id="vel1" value="8">
+    </div>
+    <div>
+      <label for="mass2">Mass 2 (kg):</label>
+      <input type="number" id="mass2" value="1">
+    </div>
+    <div>
+      <label for="vel2">Initial Velocity 2 (m/s):</label>
+      <input type="number" id="vel2" value="-8">
+    </div>
+    <button onclick="simulate()">Simulate</button>
+  </div>
+
+  <canvas id="canvas" width="600" height="200"></canvas>
+  <p id="output"></p>
+
+  <script>
+    function simulate() {
+      // input values
+      const m1 = parseFloat(document.getElementById('mass1').value);
+      const u1 = parseFloat(document.getElementById('vel1').value);
+      const m2 = parseFloat(document.getElementById('mass2').value);
+      const u2 = parseFloat(document.getElementById('vel2').value);
+
+      // find final velocities
+      const v1 = ((m1 - m2) * u1 + 2 * m2 * u2) / (m1 + m2);
+      const v2 = ((m2 - m1) * u2 + 2 * m1 * u1) / (m1 + m2);
+
+      document.getElementById('output').innerText =
+        `Final Velocities:\nv1 = ${fixDirection(v1.toFixed(2))}\nv2 = ${fixDirection(v2.toFixed(2))}`;
+
+      animateCollision(m1, u1, v1, m2, u2, v2);
+    }
+
+    function animateCollision(m1, u1, v1, m2, u2, v2) {
+      const canvas = document.getElementById('canvas');
+      const ctx = canvas.getContext('2d');
+      const width = canvas.width;
+      const height = canvas.height;
+
+      // initial
+      let x1 = 100, x2 = 300;
+
+      function draw() {
+        ctx.clearRect(0, 0, width, height);
+
+        // balls
+        ctx.fillStyle = '#a439d1';
+        ctx.beginPath();
+        ctx.arc(x1, height / 2, m1 * 10, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = 'green';
+        ctx.beginPath();
+        ctx.arc(x2, height / 2, m2 * 10, 0, Math.PI * 2);
+        ctx.fill();
+
+        x1 += u1 / 10;
+        x2 += u2 / 10;
+
+        // check collision
+        if (x1 + m1 * 10 >= x2 - m2 * 10) {
+          // apply final velocities
+          u1 = v1;
+          u2 = v2;
+        }
+
+        // dont bother drawing if balls are out of canvas
+        if (x1 > width || x2 < 0) return;
+
+        requestAnimationFrame(draw);
+      }
+
+      draw();
+    }
+
+    function fixDirection(velocity){
+        if(velocity < 0){
+            return velocity.replace("-","") + " m/s [left]";
+        } else {
+            return velocity + " m/s [right]";
+        }
+    }
+  </script>
+</body>
+</html>
