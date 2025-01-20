@@ -44,7 +44,7 @@
       }
 
       button:hover {
-        background-color: #45a049;
+        background-color: #8a2fb1;
       }
 
       #result {
@@ -57,29 +57,32 @@
     <div class="container">
       <h1>Relativistic Velocity Calculator</h1>
 
-      <img id="calculator-image" src="#" alt="Placeholder image" />
+      <img id="diagram-image" src="#" alt="diagram" />
+      <br>
 
-      <label for="v">Spaceship Velocity (Vso) (in terms of c, relative to observer):</label>
+      <label for="v">Spaceship Velocity (Vso):</label>
       <input
-        type="number"
+        type="text"
         id="v"
-        placeholder="Enter spaceship velocity"
+        placeholder="0.9c"
         step="0.01"
       />
 
-      <label for="u">Rocket Velocity (Vrs) (in terms of c, relative to spaceship):</label>
+      <label for="u">Rocket Velocity (Vrs):</label>
       <input
-        type="number"
+        type="text"
         id="u"
-        placeholder="Enter rocket velocity"
+        placeholder="0.9c"
         step="0.01"
       />
+
+      <h4>keep in mind Vrs is the rocket's speed relative to the spaceship</h4>
 
       <button onclick="calculateVelocity()">Calculate Relative Velocity</button>
 
       <div id="result">
         <p>
-          Relative Velocity: <span id="velocity">N/A</span> (in fraction of c)
+          Relative Velocity: <span id="velocity">N/A</span>
         </p>
       </div>
     </div>
@@ -87,8 +90,16 @@
     <script>
       // calculate the relativistic velocity
       function calculateVelocity() {
-        const v = parseFloat(document.getElementById("v").value);
-        const u = parseFloat(document.getElementById("u").value);
+        let v = document.getElementById("v");
+        let u = document.getElementById("u");
+        v = parseFloat(v.value.split("c")[0]);
+        u = parseFloat(u.value.split("c")[0]);
+        if(!v){
+            v = 0.9;
+        }
+        if(!u){
+            u = 0.9;
+        }
 
         // validate inputs
         if (isNaN(v) || isNaN(u) || v < 0 || v >= 1 || u < 0 || u >= 1) {
@@ -98,13 +109,13 @@
           return;
         }
 
-        // Relativistic velocity addition formula
-        const c = 1; // Speed of light in normalized units (c = 1 for this calculation)
+        const c = 1; // Speed of light in normalized units
         const relativeVelocity = (v + u) / (1 + v * u);
+        // see https://youtu.be/R5oCXHWEL9A?si=ARnHKYTjgH6lAiOG&t=217
 
-        // Display the result
+        // update result
         document.getElementById("velocity").innerText =
-          relativeVelocity.toFixed(4);
+          relativeVelocity.toFixed(4) + "c";
       }
     </script>
   </body>
