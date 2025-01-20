@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Projectile Motion Simulator</title>
+    <title>Relativistic Velocity Calculator</title>
     <link rel="icon" href="/images/favicon.ico" type="image/x-icon" />
 
     <style>
@@ -19,28 +19,40 @@
 
       .container {
         background-color: #fff;
-        padding: 20px;
-        border-radius: 8px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        width: 300px;
+        padding: 40px;
+        border-radius: 12px;
+        box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);
+        width: 80%;
+        max-width: 800px;
         text-align: center;
       }
 
       input {
-        width: 100%;
-        padding: 8px;
-        margin: 10px -10px;
-        border-radius: 4px;
+        width: calc(100% - 20px);
+        padding: 12px;
+        margin: 10px 0;
+        border-radius: 8px;
         border: 1px solid #ccc;
+        font-size: 1.1em;
+      }
+
+      img {
+        width: 100%;
+        max-width: 500px;
+        margin: 20px auto;
+        display: block;
+        border-radius: 12px;
       }
 
       button {
-        padding: 10px 20px;
+        padding: 15px 30px;
+        font-size: 1.2em;
         background-color: #a439d1;
         color: white;
         border: none;
-        border-radius: 4px;
+        border-radius: 8px;
         cursor: pointer;
+        margin-top: 20px;
       }
 
       button:hover {
@@ -48,8 +60,19 @@
       }
 
       #result {
-        margin-top: 20px;
+        margin-top: 30px;
+        font-size: 1.5em;
         font-weight: bold;
+        color: #333;
+        opacity: 0;
+        transform: scale(0.9);
+        transition: all 0.4s ease;
+      }
+
+      #result.active {
+        color: #a439d1;
+        opacity: 1;
+        transform: scale(1.2);
       }
     </style>
   </head>
@@ -57,26 +80,20 @@
     <div class="container">
       <h1>Relativistic Velocity Calculator</h1>
 
-      <img id="diagram-image" src="#" alt="diagram" />
-      <br>
+      <img
+        id="diagram-image"
+        src="https://raw.githubusercontent.com/Dex9999/declan-physics/refs/heads/main/relativediagram.png"
+        alt="diagram"
+      />
+      <br />
 
       <label for="v">Spaceship Velocity (Vso):</label>
-      <input
-        type="text"
-        id="v"
-        placeholder="0.9c"
-        step="0.01"
-      />
+      <input type="text" id="v" placeholder="0.9c" step="0.01" />
 
       <label for="u">Rocket Velocity (Vrs):</label>
-      <input
-        type="text"
-        id="u"
-        placeholder="0.9c"
-        step="0.01"
-      />
+      <input type="text" id="u" placeholder="0.9c" step="0.01" />
 
-      <h4>keep in mind Vrs is the rocket's speed relative to the spaceship</h4>
+      <h4>Keep in mind Vrs is the rocket's speed relative to the spaceship</h4>
 
       <button onclick="calculateVelocity()">Calculate Relative Velocity</button>
 
@@ -94,11 +111,11 @@
         let u = document.getElementById("u");
         v = parseFloat(v.value.split("c")[0]);
         u = parseFloat(u.value.split("c")[0]);
-        if(!v){
-            v = 0.9;
+        if (!v) {
+          v = 0.9;
         }
-        if(!u){
-            u = 0.9;
+        if (!u) {
+          u = 0.9;
         }
 
         // validate inputs
@@ -111,11 +128,16 @@
 
         const c = 1; // Speed of light in normalized units
         const relativeVelocity = (v + u) / (1 + v * u);
-        // see https://youtu.be/R5oCXHWEL9A?si=ARnHKYTjgH6lAiOG&t=217
 
-        // update result
-        document.getElementById("velocity").innerText =
-          relativeVelocity.toFixed(4) + "c";
+        // update result with animation
+        const resultElement = document.getElementById("result");
+        const velocityElement = document.getElementById("velocity");
+        velocityElement.innerText = relativeVelocity.toFixed(4) + "c";
+
+        // Add active class for animation
+        resultElement.classList.remove("active");
+        void resultElement.offsetWidth; // Trigger reflow to restart animation
+        resultElement.classList.add("active");
       }
     </script>
   </body>
